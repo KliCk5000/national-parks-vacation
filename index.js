@@ -52,8 +52,10 @@ function getReverseGeocode(latlng, elementID) {
     throw new Error(response.statusText);
   })
   .then(responseJson => { 
-    console.log(responseJson.results[0].formatted_address);
-    $(`#${elementID}`).text(`Address: ${responseJson.results[0].formatted_address}`)
+    if (responseJson.results[0] !== undefined) {
+      console.log(responseJson.results[0].formatted_address);
+      $(`#${elementID}`).text(`Address: ${responseJson.results[0].formatted_address}`)
+    }
   })
   .catch(err => {
     $(`#${elementID}`).text('Could not get address: ' + err);
@@ -76,7 +78,7 @@ function displayResults(responseJson) {
     let latlng = responseJson.data[obj].latLong;
     let elementID = `li${obj}`;
     
-    if (latlng !== "") {
+    if (latlng !== undefined && latlng !== "") {
       getReverseGeocode(latlng, elementID);
     }
 
