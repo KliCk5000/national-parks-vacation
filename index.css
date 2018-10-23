@@ -11,6 +11,10 @@ body {
   margin: 0 auto;
 }
 
+.form-line {
+  margin: 5px;
+}
+
 .hidden {
   display: none;
 }

@@ -5,18 +5,20 @@ const A3 = "C7TLRuurMuRM2O";
 const API_KEY = A1 + A3 + A2;
 
 // Get National Parks list
-function getNationalParksList(state) { 
+function getNationalParksList(state, maxResults) { 
   // -setup query
   const params = {
     api_key: API_KEY,
     stateCode: state,
-    // limit: "",
+    limit: maxResults,
     // q: "",
   };
   // -put url together (FormatQueryParams)
   const queryString = formatQueryParams(params);
   const url = `${NATIONAL_PARKS_URL}parks?${queryString}`;
  
+  console.log(url);
+
   // -FETCH
   fetch(url)
     .then(response => {
@@ -31,6 +33,33 @@ function getNationalParksList(state) {
     });
 }
 
+function getReverseGeocode(latlng, elementID) {
+  const splitLatLong = latlng.split(', ');
+  const googleLatLng = `latlng=${splitLatLong[0].substr(4)},${splitLatLong[1].substr(5)}`
+  const google_url = "https://maps.googleapis.com/maps/api/geocode/json?";
+  const k1 = "AIzaSyDfecR4U"
+  const k2 = "r2OdLAmKczvA";
+  const k3 = "FalgjCmVA2dLp4";
+  const google_api = "&key=" + k1 + k3 + k2;
+  const completeURL = google_url + googleLatLng + google_api;
+  console.log(completeURL);
+
+  fetch(completeURL)
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error(response.statusText);
+  })
+  .then(responseJson => { 
+    console.log(responseJson.results[0].formatted_address);
+    $(`#${elementID}`).text(`Address: ${responseJson.results[0].formatted_address}`)
+  })
+  .catch(err => {
+    $(`#${elementID}`).text('Could not get address: ' + err);
+  });
+}
+
 function formatQueryParams(params) {
   const queryItems = Object.keys(params)
   .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`);
@@ -42,15 +71,22 @@ function displayResults(responseJson) {
   console.log(responseJson);
   $('.js-results-list').empty();
 
-  for (let obj in responseJson) {
-    // $('.js-results-list').append(
-    //   `<li><h3><a href="${responseJson[obj].html_url}">${responseJson[obj].name}</a></h3>
-    //   <p>Created: ${responseJson[obj].created_at.substr(0, responseJson[obj].created_at.indexOf('T'))}</p>
-    //   <p>By ${responseJson[obj].owner.login}</p>
-    //   <p>Description: ${responseJson[obj].description}</p>
-    //   <p>Language: ${responseJson[obj].language}</p>
-    //   </li>`
-    // );
+  for (let obj in responseJson.data) {
+    // Make a quick pit-stop to the google reverse geocode api to get address from lat lng
+    let latlng = responseJson.data[obj].latLong;
+    let elementID = `li${obj}`;
+    
+    if (latlng !== "") {
+      getReverseGeocode(latlng, elementID);
+    }
+
+    $('.js-results-list').append(
+      `<li><h3><a href="${responseJson.data[obj].url}">${responseJson.data[obj].fullName}</a></h3>
+      <p id='${elementID}'>Address: Not available</p>
+      <p>Description: ${responseJson.data[obj].description}</p>
+      </li>
+      `
+    );
   }
 
   $('.js-results').removeClass('hidden');
@@ -62,9 +98,9 @@ function watchForm() {
   $('.js-form').submit(event => {
     event.preventDefault();
     const state = $('.js-state').val();
+    const maxResults = $('.js-max-results').val();
 
-    $('.js-state').val('');
-    getNationalParksList(state);
+    getNationalParksList(state, maxResults);
   });
 }
 

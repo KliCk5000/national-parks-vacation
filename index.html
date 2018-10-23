@@ -18,10 +18,10 @@
     <!-- Form we use to search -->
     <section role="region">
       <form class="js-form">
-        <label for="state">Pick a state: </label>
-        <select name="state" class="state js-state">
-            <option value="" selected="selected">Select a State</option>
-            <option value="AL">Alabama</option>
+        <div class="form-line">
+          <label for="state">Pick a state: </label>
+          <select name="state" class="state js-state">
+            <option value="AL" selected="selected">Alabama</option>
             <option value="AK">Alaska</option>
             <option value="AZ">Arizona</option>
             <option value="AR">Arkansas</option>
@@ -73,7 +73,14 @@
             <option value="WI">Wisconsin</option>
             <option value="WY">Wyoming</option>
           </select>
-        <input type="submit" value="Submit!">
+        </div>
+        <div class="form-line">
+          <label for="max-results">Maximum results to return</label>
+          <input type="number" name="max-results" class="js-max-results" value="10">
+        </div>
+          <div class="form-line">
+            <input type="submit" value="Submit!">
+          </div>
       </form>
       <p class="error-message js-error-message"></p>
     </section>
